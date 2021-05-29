@@ -1,5 +1,6 @@
 package com.example.foodtracker.ui.dashboard;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,12 +39,18 @@ public class DashboardFragment extends Fragment {
             public void onClick(View view) {
                 Snackbar.make(view, "Here's a Snackbar", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                openCamera();
             }
         });
 
         View root = binding.getRoot();
 
         return root;
+    }
+
+    private void openCamera() {
+        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+        startActivity(intent);
     }
 
     @Override

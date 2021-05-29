@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: net.sourceforge.tess4j:tess4j:4.5.4">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sourceforge.tess4j/tess4j/4.5.4/a390ca518a5f73972923c552926bfa4ae04be8bd/tess4j-4.5.4.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sourceforge.tess4j/tess4j/4.5.4/cdcc13e7d1bf55803d918c43bd88957abd1c7238/tess4j-4.5.4-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sourceforge.tess4j/tess4j/4.5.4/dfde05de220947489c878d97b26fcb94fd64922c/tess4j-4.5.4-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

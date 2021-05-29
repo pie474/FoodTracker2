@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.navView, navController);
 
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             if (getFromPref(this, ALLOW_KEY)) {
                 showSettingsAlert();
             } else if (ContextCompat.checkSelfPermission(this,
@@ -68,8 +68,6 @@ public class MainActivity extends AppCompatActivity {
                             MY_PERMISSIONS_REQUEST_CAMERA);
                 }
             }
-        } else {
-            //openCamera();
         }
         //Tesseract
     }
