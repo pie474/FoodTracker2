@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 26
 
     defaultConfig {
         applicationId "com.example.foodtracker"

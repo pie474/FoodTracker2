@@ -3,6 +3,7 @@ package com.example.foodtracker;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,13 +16,13 @@ class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
      * (custom ViewHolder).
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textView;
+        private final CheckBox textView;
 
         public ViewHolder(View view) {
             super(view);
             // Define click listener for the ViewHolder's View
 
-            textView = (TextView) view.findViewById(R.id.textView);
+            textView = (CheckBox) view.findViewById(R.id.checkBox);
         }
 
         public TextView getTextView() {
@@ -35,7 +36,7 @@ class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
      * @param dataSet String[] containing the data to populate views to be used
      * by RecyclerView.
      */
-    public CustomAdapter(String[] dataSet) {
+    public FoodAdapter(String[] dataSet) {
         localDataSet = dataSet;
     }
 
@@ -44,7 +45,7 @@ class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
         View view = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.text_row_item, viewGroup, false);
+                .inflate(R.layout.list_item, viewGroup, false);
 
         return new ViewHolder(view);
     }
