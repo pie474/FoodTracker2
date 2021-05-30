@@ -5,5 +5,7 @@
     <string name="title_notifications">Notifications</string>
     <string name="camera_button">Camera</string>
     <string name="total_list">Food</string>
+    <string name="bread">Bread</string>
+    <string name="milk">Milk</string>
 
 </resources>
