@@ -27,6 +27,7 @@ import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.TextRecognizerOptions;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -62,6 +63,10 @@ public class MainActivity extends AppCompatActivity {
     BufferedReader bufferedReader = null;
     BufferedWriter bufferedWriter = null;
     String response = null;
+
+    public ActivityMainBinding getBinding() {
+        return binding;
+    }
 
 
     @Override
@@ -252,13 +257,11 @@ public class MainActivity extends AppCompatActivity {
                                         while ((line = bufferedReader.readLine()) != null) {
                                             output.append(line + "\n");
                                         }
-
-
-                                        response = output. toString();
+                                        response = output.toString();
 
                                         bufferedReader.close();
 
-                                        JSONArray messageDetails = new JSONArray(response) ;
+                                        JSONArray messageDetails = new JSONArray(response);
                                         messageDetails.put((new Food(DateParser.parse(text), "TEST")).toJSON());
 
                                         fileWriter = new FileWriter(foodFile.getAbsoluteFile());
@@ -291,6 +294,26 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    public JSONArray getFoods() throws IOException, JSONException {
+        StringBuffer output = new StringBuffer();
+
+        fileReader = new FileReader(foodFile.getAbsolutePath());
+
+        bufferedReader = new BufferedReader(fileReader) ;
+
+        String line = "";
+
+        while ((line = bufferedReader.readLine()) != null) {
+            output.append(line + "\n");
+        }
+        response = output.toString();
+
+        bufferedReader.close();
+
+        JSONArray messageDetails = new JSONArray(response);
+        return messageDetails;
     }
 
     @Override
