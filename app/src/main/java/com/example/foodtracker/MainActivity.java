@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -27,11 +26,14 @@ import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.TextRecognizerOptions;
 
+import org.json.JSONArray;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -51,6 +53,16 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_IMAGE_CAPTURE = 1;
     public static final String ALLOW_KEY = "ALLOWED";
     public static final String CAMERA_PREF = "camera_pref";
+    public static final String FOOD_FILE = "food.json";
+
+
+    File foodFile;
+    FileReader fileReader = null;
+    FileWriter fileWriter = null;
+    BufferedReader bufferedReader = null;
+    BufferedWriter bufferedWriter = null;
+    String response = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,12 +82,10 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.navView, navController);
 
 
-         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             if (getFromPref(this, ALLOW_KEY)) {
                 showSettingsAlert();
-            } else if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.CAMERA)
-
+            } else if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     != PackageManager.PERMISSION_GRANTED) {
 
                 // Should we show an explanation?
@@ -90,7 +100,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        //Tesseract
+        foodFile = new File(this.getFilesDir(), FOOD_FILE);
+
+        if (!foodFile.exists()) {
+            try {
+                foodFile.createNewFile();
+                fileWriter = new FileWriter(foodFile.getAbsoluteFile());
+                bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter.write("[]");
+                bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static void saveToPreferences(Context context, String key, Boolean allowed) {
@@ -216,9 +238,39 @@ public class MainActivity extends AppCompatActivity {
                                     if(textBlock != null) {
                                         text = textBlock.getText();
                                     }
-                                    Snackbar.make(binding.getRoot(), text, Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                    System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"+text+"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+
+
+                                    try {
+                                        StringBuffer output = new StringBuffer();
+
+                                        fileReader = new FileReader(foodFile.getAbsolutePath());
+
+                                        bufferedReader = new BufferedReader(fileReader) ;
+
+                                        String line = "";
+
+                                        while ((line = bufferedReader.readLine()) != null) {
+                                            output.append(line + "\n");
+                                        }
+
+
+                                        response = output. toString();
+
+                                        bufferedReader.close();
+
+                                        JSONArray messageDetails = new JSONArray(response) ;
+                                        messageDetails.put((new Food(DateParser.parse(text), "TEST")).toJSON());
+
+                                        fileWriter = new FileWriter(foodFile.getAbsoluteFile());
+                                        BufferedWriter bw = new BufferedWriter(fileWriter);
+                                        bw.write(messageDetails.toString());
+
+                                        bw.close();
+                                    } catch(Exception e) {
+                                        Snackbar.make(binding.getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
+                                                .setAction("Action", null).show();
+                                    }
+
                                 }
                             })
                             .addOnFailureListener(
@@ -234,7 +286,8 @@ public class MainActivity extends AppCompatActivity {
 
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Snackbar.make(binding.getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                 }
             }
         }
