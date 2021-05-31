@@ -7,11 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.foodtracker.Food;
-import com.example.foodtracker.MainActivity;
 import com.example.foodtracker.databinding.FragmentNotificationsBinding;
-import com.google.android.material.snackbar.Snackbar;
-
-import org.json.JSONObject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,10 +15,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.foodtracker.Food;
-import com.example.foodtracker.R;
-import com.example.foodtracker.databinding.FragmentNotificationsBinding;
 
 public class NotificationsFragment extends Fragment {
 
@@ -47,13 +39,14 @@ public class NotificationsFragment extends Fragment {
             }
         });
 
-        try {
-            Snackbar.make(((MainActivity)getActivity()).getBinding().getRoot(), "_" + Food.fromJson((JSONObject)((MainActivity)getActivity()).getFoods().get(0)).getType(), Snackbar.LENGTH_LONG)
+        /*try {
+            JSONArray arr = ((MainActivity)getActivity()).getFoods();
+            Snackbar.make(((MainActivity)getActivity()).getBinding().getRoot(), "" + Food.fromJson((JSONObject)arr.get(arr.length()-1)).getType(), Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
         } catch (Exception e) {
             Snackbar.make(((MainActivity)getActivity()).getBinding().getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
-        }
+        }*/
 
         return root;
     }

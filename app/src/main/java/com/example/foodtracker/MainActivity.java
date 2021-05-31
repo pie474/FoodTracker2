@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
                                         bufferedReader.close();
 
                                         JSONArray messageDetails = new JSONArray(response);
-                                        messageDetails.put((new Food(DateParser.parse(text), "TEST")).toJSON());
+                                        messageDetails.put((new Food(DateParser.parse(text), text)).toJSON());
 
                                         fileWriter = new FileWriter(foodFile.getAbsoluteFile());
                                         BufferedWriter bw = new BufferedWriter(fileWriter);
