@@ -6,14 +6,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.foodtracker.Food;
 import com.example.foodtracker.FoodAdapter;
+import com.example.foodtracker.MainActivity;
 import com.example.foodtracker.R;
 import com.example.foodtracker.databinding.FragmentDashboardBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.example.foodtracker.Food;
-import com.google.android.material.snackbar.Snackbar;
-import com.example.foodtracker.MainActivity;
-import com.example.foodtracker.databinding.FragmentDashboardBinding;
+
+import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,9 +22,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 
 public class DashboardFragment extends Fragment {
@@ -42,15 +39,15 @@ public class DashboardFragment extends Fragment {
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        View view= inflater.inflate(R.layout.fragment_dashboard, container, false);
-        recyclerView = view.findViewById(R.id.recycler_view);
+        inflater.inflate(R.layout.fragment_dashboard, container, false);
+        recyclerView = root.findViewById(R.id.recycler_view);
         items = new Food[]{
                 new Food(new Date(), "Bread"),
                 new Food(new Date(), "Milk"),
                 new Food(new Date(), "Cheese")
         };
         FoodAdapter foodAdapter = new FoodAdapter(items, getContext());
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(view.getContext());
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(root.getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(foodAdapter);
 
@@ -71,7 +68,7 @@ public class DashboardFragment extends Fragment {
         });
 
 
-        return view;
+        return root;
     }
 
 
