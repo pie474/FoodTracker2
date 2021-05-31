@@ -10,14 +10,37 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
 
 import com.example.foodtracker.databinding.ActivityMainBinding;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.text.Text;
+import com.google.mlkit.vision.text.TextRecognition;
+import com.google.mlkit.vision.text.TextRecognizer;
+import com.google.mlkit.vision.text.TextRecognizerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -28,8 +51,23 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     public static final int MY_PERMISSIONS_REQUEST_CAMERA = 100;
+    public static final int REQUEST_IMAGE_CAPTURE = 1;
     public static final String ALLOW_KEY = "ALLOWED";
     public static final String CAMERA_PREF = "camera_pref";
+    public static final String FOOD_FILE = "food.json";
+
+
+    File foodFile;
+    FileReader fileReader = null;
+    FileWriter fileWriter = null;
+    BufferedReader bufferedReader = null;
+    BufferedWriter bufferedWriter = null;
+    String response = null;
+
+    public ActivityMainBinding getBinding() {
+        return binding;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +87,10 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.navView, navController);
 
 
-         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             if (getFromPref(this, ALLOW_KEY)) {
                 showSettingsAlert();
-            } else if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.CAMERA)
-
+            } else if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     != PackageManager.PERMISSION_GRANTED) {
 
                 // Should we show an explanation?
@@ -69,7 +105,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        //Tesseract
+        foodFile = new File(this.getFilesDir(), FOOD_FILE);
+
+        if (!foodFile.exists()) {
+            try {
+                foodFile.createNewFile();
+                fileWriter = new FileWriter(foodFile.getAbsoluteFile());
+                bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter.write("[]");
+                bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static void saveToPreferences(Context context, String key, Boolean allowed) {
@@ -140,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_CAMERA: {
                 for (int i = 0, len = permissions.length; i < len; i++) {
@@ -172,6 +221,102 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            if( photoURI != null) {
+
+                InputImage image;
+                try {
+                    image = InputImage.fromFilePath(this, photoURI);
+                    TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+
+                    Task<Text> result = recognizer.process(image)
+                            .addOnSuccessListener(new OnSuccessListener<Text>() {
+                                @Override
+                                public void onSuccess(Text visionText) {
+                                    // Task completed successfully
+                                    // ...
+                                    Text.TextBlock textBlock = visionText.getTextBlocks().get(0);
+                                    String text = "rip";
+                                    if(textBlock != null) {
+                                        text = textBlock.getText();
+                                    }
+
+
+                                    try {
+                                        StringBuffer output = new StringBuffer();
+
+                                        fileReader = new FileReader(foodFile.getAbsolutePath());
+
+                                        bufferedReader = new BufferedReader(fileReader) ;
+
+                                        String line = "";
+
+                                        while ((line = bufferedReader.readLine()) != null) {
+                                            output.append(line + "\n");
+                                        }
+                                        response = output.toString();
+
+                                        bufferedReader.close();
+
+                                        JSONArray messageDetails = new JSONArray(response);
+                                        messageDetails.put((new Food(DateParser.parse(text), "TEST")).toJSON());
+
+                                        fileWriter = new FileWriter(foodFile.getAbsoluteFile());
+                                        BufferedWriter bw = new BufferedWriter(fileWriter);
+                                        bw.write(messageDetails.toString());
+
+                                        bw.close();
+                                    } catch(Exception e) {
+                                        Snackbar.make(binding.getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
+                                                .setAction("Action", null).show();
+                                    }
+
+                                }
+                            })
+                            .addOnFailureListener(
+                                    new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            // Task failed with an exception
+                                            // ...
+                                            throw new RuntimeException("recognizer failed");
+                                        }
+                                    });
+
+
+
+                } catch (Exception e) {
+                    Snackbar.make(binding.getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            }
+        }
+    }
+
+    public JSONArray getFoods() throws IOException, JSONException {
+        StringBuffer output = new StringBuffer();
+
+        fileReader = new FileReader(foodFile.getAbsolutePath());
+
+        bufferedReader = new BufferedReader(fileReader) ;
+
+        String line = "";
+
+        while ((line = bufferedReader.readLine()) != null) {
+            output.append(line + "\n");
+        }
+        response = output.toString();
+
+        bufferedReader.close();
+
+        JSONArray messageDetails = new JSONArray(response);
+        return messageDetails;
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
     }
@@ -191,9 +336,49 @@ public class MainActivity extends AppCompatActivity {
         context.startActivity(i);
     }
 
-    private void openCamera() {
-        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+
+    public void openCamera() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivity(intent);
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                photoURI = FileProvider.getUriForFile(this,
+                        "com.example.android.fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+
+        }
+    }
+    Uri photoURI;
+    String currentPhotoPath;
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        //String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "latest";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
 }

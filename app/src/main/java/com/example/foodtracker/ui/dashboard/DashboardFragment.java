@@ -1,6 +1,5 @@
 package com.example.foodtracker.ui.dashboard;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +12,8 @@ import com.example.foodtracker.databinding.FragmentDashboardBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.example.foodtracker.Food;
 import com.google.android.material.snackbar.Snackbar;
+import com.example.foodtracker.MainActivity;
+import com.example.foodtracker.databinding.FragmentDashboardBinding;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -65,9 +66,7 @@ public class DashboardFragment extends Fragment {
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*Snackbar.make(view, "Here's a Snackbar", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
-                openCamera();
+                ((MainActivity)getActivity()).openCamera();
             }
         });
 
@@ -75,10 +74,6 @@ public class DashboardFragment extends Fragment {
         return view;
     }
 
-    private void openCamera() {
-        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-        startActivity(intent);
-    }
 
     @Override
     public void onDestroyView() {
