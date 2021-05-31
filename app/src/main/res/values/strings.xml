@@ -5,5 +5,9 @@
     <string name="title_notifications">Notifications</string>
     <string name="camera_button">Camera</string>
     <string name="total_list">Food</string>
+    <string name="bread">Bread</string>
+    <string name="milk">Milk</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
