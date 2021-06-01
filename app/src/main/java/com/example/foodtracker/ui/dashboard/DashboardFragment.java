@@ -66,6 +66,7 @@ public class DashboardFragment extends Fragment {
                 new Food(new Date(), "Milk"),
                 new Food(new Date(), "Cheese")
         };*/
+
         FoodAdapter foodAdapter = new FoodAdapter(items, getContext());
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(root.getContext());
         recyclerView.setLayoutManager(linearLayoutManager);

@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.InputType;
+import android.widget.EditText;
 
 import com.example.foodtracker.databinding.ActivityMainBinding;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -107,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         }
         foodFile = new File(this.getFilesDir(), FOOD_FILE);
 
-        if (!foodFile.exists()) {
+        if (true || !foodFile.exists()) {
             try {
                 foodFile.createNewFile();
                 fileWriter = new FileWriter(foodFile.getAbsoluteFile());
@@ -245,34 +247,61 @@ public class MainActivity extends AppCompatActivity {
                                     }
 
 
-                                    try {
-                                        StringBuffer output = new StringBuffer();
 
-                                        fileReader = new FileReader(foodFile.getAbsolutePath());
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                    builder.setTitle("Enter Food Name");
 
-                                        bufferedReader = new BufferedReader(fileReader) ;
+                                    // Set up the input
+                                    final EditText input = new EditText(MainActivity.this);
+                                    // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                                    input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL);
+                                    builder.setView(input);
 
-                                        String line = "";
+                                    // Set up the buttons
+                                    String finalText = text;
+                                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            try {
+                                                StringBuffer output = new StringBuffer();
 
-                                        while ((line = bufferedReader.readLine()) != null) {
-                                            output.append(line + "\n");
+                                                fileReader = new FileReader(foodFile.getAbsolutePath());
+
+                                                bufferedReader = new BufferedReader(fileReader) ;
+
+                                                String line = "";
+
+                                                while ((line = bufferedReader.readLine()) != null) {
+                                                    output.append(line + "\n");
+                                                }
+                                                response = output.toString();
+
+                                                bufferedReader.close();
+
+                                                JSONArray messageDetails = new JSONArray(response);
+                                                messageDetails.put((new Food(DateParser.parse(finalText), input.getText().toString())).toJSON());
+
+                                                fileWriter = new FileWriter(foodFile.getAbsoluteFile());
+                                                BufferedWriter bw = new BufferedWriter(fileWriter);
+                                                bw.write(messageDetails.toString());
+
+                                                bw.close();
+
+                                            } catch(Exception e) {
+                                                Snackbar.make(binding.getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
+                                                        .setAction("Action", null).show();
+                                            }
                                         }
-                                        response = output.toString();
+                                    });
+                                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.cancel();
+                                        }
+                                    });
 
-                                        bufferedReader.close();
+                                    builder.show();
 
-                                        JSONArray messageDetails = new JSONArray(response);
-                                        messageDetails.put((new Food(DateParser.parse(text), text)).toJSON());
-
-                                        fileWriter = new FileWriter(foodFile.getAbsoluteFile());
-                                        BufferedWriter bw = new BufferedWriter(fileWriter);
-                                        bw.write(messageDetails.toString());
-
-                                        bw.close();
-                                    } catch(Exception e) {
-                                        Snackbar.make(binding.getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
-                                                .setAction("Action", null).show();
-                                    }
 
                                 }
                             })
