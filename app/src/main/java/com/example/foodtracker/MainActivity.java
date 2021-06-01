@@ -1,7 +1,6 @@
 package com.example.foodtracker;
 
 import android.Manifest;
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -15,11 +14,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
-
-import android.view.View;
 import android.text.InputType;
 import android.widget.EditText;
-
 
 import com.example.foodtracker.databinding.ActivityMainBinding;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -125,15 +121,15 @@ public class MainActivity extends AppCompatActivity {
         }
         foodFile = new File(this.getFilesDir(), FOOD_FILE);
 
-        if (true || !foodFile.exists()) {
+        if (!foodFile.exists()) {
             try {
                 foodFile.createNewFile();
                 fileWriter = new FileWriter(foodFile.getAbsoluteFile());
                 bufferedWriter = new BufferedWriter(fileWriter);
-                bufferedWriter.write("["+(new Food(new Date(), "test")).toJSON()+"]");
+                bufferedWriter.write("[]");
 
                 bufferedWriter.close();
-            } catch (IOException | JSONException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
