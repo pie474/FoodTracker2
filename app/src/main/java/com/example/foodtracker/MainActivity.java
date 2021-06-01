@@ -1,8 +1,10 @@
 package com.example.foodtracker;
 
 import android.Manifest;
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,8 +15,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+
+import android.view.View;
 import android.text.InputType;
 import android.widget.EditText;
+
 
 import com.example.foodtracker.databinding.ActivityMainBinding;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -30,6 +35,7 @@ import com.google.mlkit.vision.text.TextRecognizerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -37,16 +43,23 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import static com.example.foodtracker.Notif.NOTIFICATION_ID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,7 +70,10 @@ public class MainActivity extends AppCompatActivity {
     public static final String ALLOW_KEY = "ALLOWED";
     public static final String CAMERA_PREF = "camera_pref";
     public static final String FOOD_FILE = "food.json";
-
+    private NotificationManagerCompat notificationManager;
+    ArrayList<Food> allItems;
+    ArrayList<Food> almostExpired;
+    Date expCheck = Calendar.getInstance().getTime();
 
     File foodFile;
     FileReader fileReader = null;
@@ -114,11 +130,51 @@ public class MainActivity extends AppCompatActivity {
                 foodFile.createNewFile();
                 fileWriter = new FileWriter(foodFile.getAbsoluteFile());
                 bufferedWriter = new BufferedWriter(fileWriter);
-                bufferedWriter.write("[]");
+                bufferedWriter.write("["+(new Food(new Date(), "test")).toJSON()+"]");
+
                 bufferedWriter.close();
-            } catch (IOException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
+        }
+
+        notificationManager = NotificationManagerCompat.from(this);
+
+        try {
+            JSONArray arr = getFoods();
+            ArrayList<Food> newFoods = new ArrayList<Food>();
+
+            for(int i = 0; i<arr.length(); i++) {
+                newFoods.add(Food.fromJson((JSONObject)arr.get(i)));
+            }
+            allItems = newFoods;
+        } catch (Exception e) {
+            Snackbar.make(getBinding().getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+        }
+
+        expCheck.setHours(0);
+        expCheck.setSeconds(0);
+        expCheck.setMinutes(0);
+        expCheck.setDate(expCheck.getDate() + 2);
+
+        almostExpired =  new ArrayList<Food>();
+        for(Food a:allItems){
+            if(expCheck.compareTo(a.getExpDate()) >= 0 ){
+                boolean something = false;
+                for(Food b: almostExpired){
+                    if(a.equals(b)){
+                        something = true;
+                    }
+                }
+                if(!something) {
+                    almostExpired.add(a);
+                }
+            }
+        }
+
+        for(Food a:almostExpired){
+            sendNotification(a);
         }
     }
 
@@ -134,6 +190,19 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences myPrefs = context.getSharedPreferences(CAMERA_PREF,
                 Context.MODE_PRIVATE);
         return (myPrefs.getBoolean(key, false));
+
+    }
+
+    public void sendNotification(Food f){
+        String title = "Food Expiring Soon";
+        String message = "Hey! Your Item \"" + f.getType() + "\" is about to expire!";
+
+        Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_ID)
+                .setSmallIcon(R.drawable.ic_foodicon)
+                .setContentTitle(title)
+                .setContentText(message)
+                .build();
+        notificationManager.notify(1, notification );
     }
 
     private void showAlert() {
