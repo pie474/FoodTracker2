@@ -22,6 +22,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Date;
+
 
 public class DashboardFragment extends Fragment {
 
@@ -61,10 +63,25 @@ public class DashboardFragment extends Fragment {
             Snackbar.make(((MainActivity)getActivity()).getBinding().getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
         }
+
         /*items = new Food[]{
                 new Food(new Date(), "Bread"),
                 new Food(new Date(), "Milk"),
-                new Food(new Date(), "Cheese")
+                new Food(new Date(), "Cheese"),
+                new Food(new Date(), "Rice"),
+                new Food(new Date(), "Lettuce"),
+                new Food(new Date(), "Tomatoes"),
+                new Food(new Date(), "Spinach"),
+                new Food(new Date(), "Olives"),
+                new Food(new Date(), "Pasta"),
+                new Food(new Date(), "Noodles"),
+                new Food(new Date(), "Ketchup"),
+                new Food(new Date(), "Soy Sauce"),
+                new Food(new Date(), "Spoons"),
+                new Food(new Date(), "Forks"),
+                new Food(new Date(), "Mango"),
+                new Food(new Date(), "Apple")
+
         };*/
 
         FoodAdapter foodAdapter = new FoodAdapter(items, getContext());
