@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -67,20 +68,20 @@ public class MainActivity extends AppCompatActivity {
     public static final String CAMERA_PREF = "camera_pref";
     public static final String FOOD_FILE = "food.json";
     private NotificationManagerCompat notificationManager;
-    ArrayList<Food> allItems;
     ArrayList<Food> almostExpired;
     Date expCheck = Calendar.getInstance().getTime();
 
-    File foodFile;
-    FileReader fileReader = null;
-    FileWriter fileWriter = null;
-    BufferedReader bufferedReader = null;
-    BufferedWriter bufferedWriter = null;
-    String response = null;
+    static File foodFile;
+    static FileReader fileReader = null;
+    static FileWriter fileWriter = null;
+    static BufferedReader bufferedReader = null;
+    static BufferedWriter bufferedWriter = null;
+    static String response = null;
 
     public ActivityMainBinding getBinding() {
         return binding;
     }
+
 
 
     @Override
@@ -119,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
         foodFile = new File(this.getFilesDir(), FOOD_FILE);
 
         if (!foodFile.exists()) {
@@ -136,41 +138,29 @@ public class MainActivity extends AppCompatActivity {
 
         notificationManager = NotificationManagerCompat.from(this);
 
-        try {
-            JSONArray arr = getFoods();
-            ArrayList<Food> newFoods = new ArrayList<Food>();
-
-            for(int i = 0; i<arr.length(); i++) {
-                newFoods.add(Food.fromJson((JSONObject)arr.get(i)));
-            }
-            allItems = newFoods;
-        } catch (Exception e) {
-            Snackbar.make(getBinding().getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
-        }
-
         expCheck.setHours(0);
         expCheck.setSeconds(0);
         expCheck.setMinutes(0);
         expCheck.setDate(expCheck.getDate() + 2);
 
         almostExpired =  new ArrayList<Food>();
-        for(Food a:allItems){
-            if(expCheck.compareTo(a.getExpDate()) >= 0 ){
-                boolean something = false;
-                for(Food b: almostExpired){
-                    if(a.equals(b)){
-                        something = true;
+        try {
+            for(Food a:getFoodsArray()){
+                if(expCheck.compareTo(a.getExpDate()) >= 0 ){
+                    boolean something = false;
+                    for(Food b: almostExpired){
+                        if(a.equals(b)){
+                            something = true;
+                        }
+                    }
+                    if(!something) {
+                        almostExpired.add(a);
+                        sendNotification(a);
                     }
                 }
-                if(!something) {
-                    almostExpired.add(a);
-                }
             }
-        }
-
-        for(Food a:almostExpired){
-            sendNotification(a);
+        } catch (IOException | JSONException | ParseException e) {
+            e.printStackTrace();
         }
     }
 
@@ -306,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
                                     // Task completed successfully
                                     // ...
                                     Text.TextBlock textBlock = visionText.getTextBlocks().get(0);
-                                    String text = "rip";
+                                    String text = "didn't work";
                                     if(textBlock != null) {
                                         text = textBlock.getText();
                                     }
@@ -322,36 +312,23 @@ public class MainActivity extends AppCompatActivity {
                                     input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL);
                                     builder.setView(input);
 
+                                    Date parsedDate;
+                                    try {
+                                        parsedDate = DateParser.parse(text);
+                                    } catch(DateParser.ParseException e) {
+                                        Snackbar.make(binding.getRoot(), e.getMessage() + "Please try again.", Snackbar.LENGTH_LONG)
+                                                .setAction("Action", null).show();
+                                        return;
+                                    }
+
                                     // Set up the buttons
-                                    String finalText = text;
                                     builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             try {
-                                                StringBuffer output = new StringBuffer();
-
-                                                fileReader = new FileReader(foodFile.getAbsolutePath());
-
-                                                bufferedReader = new BufferedReader(fileReader) ;
-
-                                                String line = "";
-
-                                                while ((line = bufferedReader.readLine()) != null) {
-                                                    output.append(line + "\n");
-                                                }
-                                                response = output.toString();
-
-                                                bufferedReader.close();
-
-                                                JSONArray messageDetails = new JSONArray(response);
-                                                messageDetails.put((new Food(DateParser.parse(finalText), input.getText().toString())).toJSON());
-
-                                                fileWriter = new FileWriter(foodFile.getAbsoluteFile());
-                                                BufferedWriter bw = new BufferedWriter(fileWriter);
-                                                bw.write(messageDetails.toString());
-
-                                                bw.close();
-
+                                                JSONArray messageDetails = getFoods();
+                                                messageDetails.put((new Food(parsedDate, input.getText().toString())).toJSON());
+                                                writeFoods(messageDetails);
                                             } catch(Exception e) {
                                                 Snackbar.make(binding.getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
                                                         .setAction("Action", null).show();
@@ -390,7 +367,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public JSONArray getFoods() throws IOException, JSONException {
+    public static JSONArray getFoods() throws IOException, JSONException {
         StringBuffer output = new StringBuffer();
 
         fileReader = new FileReader(foodFile.getAbsolutePath());
@@ -408,6 +385,24 @@ public class MainActivity extends AppCompatActivity {
 
         JSONArray messageDetails = new JSONArray(response);
         return messageDetails;
+    }
+
+    public static void writeFoods(JSONArray messageDetails) throws IOException {
+        fileWriter = new FileWriter(foodFile.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fileWriter);
+        bw.write(messageDetails.toString());
+
+        bw.close();
+    }
+
+    public static Food[] getFoodsArray() throws IOException, JSONException, ParseException {
+        JSONArray arr = getFoods();
+        Food[] newFoods = new Food[arr.length()];
+
+        for(int i = 0; i<newFoods.length; i++) {
+            newFoods[i] = Food.fromJson((JSONObject)arr.get(i));
+        }
+        return newFoods;
     }
 
     @Override

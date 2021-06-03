@@ -5,14 +5,16 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.IOException;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
     private String[] localDataSet;
@@ -26,17 +28,43 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
      */
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView textView;
+        private TextView typeView;
+        private TextView dateView;
+        private int pos;
+
+        public void setPosition(int p) {
+            pos = p;
+        }
 
         public ViewHolder(View view) {
             super(view);
             // Define click listener for the ViewHolder's View
 
-            textView = (CheckBox) itemView.findViewById(R.id.checkBox);
+            typeView = (TextView) itemView.findViewById(R.id.itemName);
+            dateView = (TextView) itemView.findViewById(R.id.itemDate);
+
+            final ImageButton cameraButton = itemView.findViewById(R.id.imageButton);
+            cameraButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        JSONArray arr = MainActivity.getFoods();
+                        arr.remove(pos);
+                        MainActivity.writeFoods(arr);
+                        //view.refreshDrawableState();
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
 
-        public TextView getTextView() {
-            return textView;
+        public TextView getTypeView() {
+            return typeView;
+        }
+
+        public TextView getDateView() {
+            return dateView;
         }
     }
 
@@ -86,7 +114,9 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
         */
 
         // viewHolder.getTextView().setText(localDataSet[position]);
-        viewHolder.getTextView().setText(dataSet2[position].getType());
+        viewHolder.setPosition(position);
+        viewHolder.getTypeView().setText(dataSet2[position].getType());
+        viewHolder.getDateView().setText(dataSet2[position].getFormattedDate());
     }
 
     // Return the size of your dataset (invoked by the layout manager)

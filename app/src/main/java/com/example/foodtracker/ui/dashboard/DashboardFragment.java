@@ -13,8 +13,7 @@ import com.example.foodtracker.databinding.FragmentDashboardBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.Arrays;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -50,13 +49,8 @@ public class DashboardFragment extends Fragment {
         recyclerView = root.findViewById(R.id.recycler_view);
 
         try {
-            JSONArray arr = ((MainActivity) getActivity()).getFoods();
-            Food[] newFoods = new Food[arr.length()];
-
-            for(int i = 0; i<newFoods.length; i++) {
-                newFoods[i] = Food.fromJson((JSONObject)arr.get(i));
-            }
-            items = newFoods;
+            items = MainActivity.getFoodsArray();
+            Arrays.sort(items);
         } catch (Exception e) {
             Snackbar.make(((MainActivity)getActivity()).getBinding().getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
