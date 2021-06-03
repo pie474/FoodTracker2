@@ -71,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Food> almostExpired;
     Date expCheck = Calendar.getInstance().getTime();
 
+    public static final int EXPIRED_DAYS_THRESHOLD = 4;
+
     static File foodFile;
     static FileReader fileReader = null;
     static FileWriter fileWriter = null;
@@ -143,10 +145,15 @@ public class MainActivity extends AppCompatActivity {
         expCheck.setMinutes(0);
         expCheck.setDate(expCheck.getDate() + 2);
 
+
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date());
+        c.add(Calendar.DAY_OF_MONTH, EXPIRED_DAYS_THRESHOLD);
+
         almostExpired =  new ArrayList<Food>();
         try {
             for(Food a:getFoodsArray()){
-                if(expCheck.compareTo(a.getExpDate()) >= 0 ){
+                if(c.after(a.getExpDate())) {//expCheck.compareTo(a.getExpDate()) >= 0 ||
                     boolean something = false;
                     for(Food b: almostExpired){
                         if(a.equals(b)){
@@ -181,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void sendNotification(Food f){
         String title = "Food Expiring Soon";
-        String message = "Hey! Your Item \"" + f.getType() + "\" is about to expire!";
+        String message = "Hey! Your Item \"" + f.getType() + "\" is about to expire in "+EXPIRED_DAYS_THRESHOLD+" days!";
 
         Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_ID)
                 .setSmallIcon(R.drawable.ic_foodicon)
@@ -295,11 +302,13 @@ public class MainActivity extends AppCompatActivity {
                                 public void onSuccess(Text visionText) {
                                     // Task completed successfully
                                     // ...
-                                    Text.TextBlock textBlock = visionText.getTextBlocks().get(0);
-                                    String text = "didn't work";
-                                    if(textBlock != null) {
-                                        text = textBlock.getText();
+                                    StringBuilder text = new StringBuilder(" ");
+                                    for(Text.TextBlock t : visionText.getTextBlocks()) {
+                                        if(t != null) {
+                                            text.append(t.getText());
+                                        }
                                     }
+
 
 
 
@@ -314,9 +323,9 @@ public class MainActivity extends AppCompatActivity {
 
                                     Date parsedDate;
                                     try {
-                                        parsedDate = DateParser.parse(text);
+                                        parsedDate = DateParser.parse(text.toString());
                                     } catch(DateParser.ParseException e) {
-                                        Snackbar.make(binding.getRoot(), e.getMessage() + "Please try again.", Snackbar.LENGTH_LONG)
+                                        Snackbar.make(binding.getRoot(), e.getMessage() + " " + text, Snackbar.LENGTH_LONG)
                                                 .setAction("Action", null).show();
                                         return;
                                     }

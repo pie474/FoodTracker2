@@ -3,29 +3,30 @@ package com.example.foodtracker;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import androidx.annotation.NonNull;
-
 class DateParser {
     //EXP: 03-03-13
-    private static String[] PREFIXES = new String[] {"by: ", "by ", "exp: "};
-    private static String[] DATE_PATTERNS = new String[] {"MM/dd/yyyy", "MM/dd/yy", "MM-dd-yyyy", "MM-dd-yy"};
+    private static String[] PREFIXES = new String[] {"by: ", "by:", "by ", "by", "exp: ", "exp:"};
+    private static String[] DATE_PATTERNS = new String[] {"MM/dd/yyyy", "MM/dd/yy", "MM-dd-yyyy", "MM-dd-yy", "MM dd", "MM dd yy", "MM dd yyyy", "MMddyyyy"};
 
     public static Date parse(String s) throws ParseException {
         String s2 = s.toLowerCase();
 
         int prefixStrInd = -1, prefixInd;
         for(prefixInd = 0; prefixInd< PREFIXES.length && prefixStrInd == -1; prefixInd++) {
-            prefixStrInd = s2.indexOf("by:");
+            prefixStrInd = s2.indexOf(PREFIXES[prefixInd]);
         }
         if(prefixStrInd == -1) throw new ParseException("Could not find expiration date.");
 
-        s2 = s2.substring(0, prefixInd);
+        s2 = s2.substring(prefixInd);
 
         Date out = null;
         for(String pat : DATE_PATTERNS) {
             try {
-                out = new SimpleDateFormat(s).parse(s2.substring(0, pat.length()));
-            } catch (java.text.ParseException ignored) {}
+                String sub = s2.substring(0, pat.length());
+                System.out.println(sub);
+                out = new SimpleDateFormat(pat).parse(sub);
+                break;
+            } catch (Exception ignored) {}
         }
         if(out == null) throw new ParseException("Could not read date.");
 
@@ -33,8 +34,9 @@ class DateParser {
     }
 
     public static class ParseException extends RuntimeException {
-        public ParseException(@NonNull String message) {
+        public ParseException(String message) {
             super(message);
         }
     }
 }
+
