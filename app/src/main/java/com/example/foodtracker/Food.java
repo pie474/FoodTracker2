@@ -1,11 +1,12 @@
 package com.example.foodtracker;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-import java.util.GregorianCalendar;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class Food implements Comparable<Food> {
     Date expDate;
@@ -15,8 +16,7 @@ public class Food implements Comparable<Food> {
         this.type = type;
     }
 
-    public String toString(){
-
+    public String toString() {
         return type + " (Expiration Date: " + getFormattedDate() +")";
     }
 
@@ -30,7 +30,7 @@ public class Food implements Comparable<Food> {
 
 
     public String getFormattedDate() {
-        return (new SimpleDateFormat("MM/dd/yyyy")).format(expDate);
+        return (new SimpleDateFormat("MM/dd/yyyy", Locale.US)).format(expDate);
     }
 
     public String getRecipe() {
@@ -55,6 +55,6 @@ public class Food implements Comparable<Food> {
     }
 
     public static Food fromJson(JSONObject json) throws JSONException, ParseException {
-        return new Food((new SimpleDateFormat("MM/dd/yyyy")).parse((String)json.get("date")), (String)json.get("type"));
+        return new Food((new SimpleDateFormat("MM/dd/yyyy", Locale.US)).parse((String)json.get("date")), (String)json.get("type"));
     }
 }

@@ -2,6 +2,7 @@ package com.example.foodtracker;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 class DateParser {
     //EXP: 03-03-13
@@ -22,9 +23,11 @@ class DateParser {
         Date out = null;
         for(String pat : DATE_PATTERNS) {
             try {
-                String sub = s2.substring(0, pat.length());
-                System.out.println(sub);
-                out = new SimpleDateFormat(pat).parse(sub);
+                out = new SimpleDateFormat(pat, Locale.US).parse(s2.substring(0, pat.length()));
+                break;
+            } catch (Exception ignored) {}
+            try {
+                out = new SimpleDateFormat(pat, Locale.US).parse(s2.substring(0, pat.length()+1));
                 break;
             } catch (Exception ignored) {}
         }

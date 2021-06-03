@@ -125,6 +125,9 @@ public class MainActivity extends AppCompatActivity {
 
         foodFile = new File(this.getFilesDir(), FOOD_FILE);
 
+        Snackbar.make(binding.getRoot(), ""+foodFile.getAbsoluteFile().getPath(), Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+
         if (!foodFile.exists()) {
             try {
                 foodFile.createNewFile();
@@ -309,8 +312,48 @@ public class MainActivity extends AppCompatActivity {
                                         }
                                     }
 
+                                    Date parsedDate;
+                                    try {
+                                        parsedDate = DateParser.parse(text.toString());
+                                    } catch(DateParser.ParseException e) {
+                                        Snackbar.make(binding.getRoot(), e.getMessage() + " " + text, Snackbar.LENGTH_LONG)
+                                                .setAction("Action", null).show();
+
+                                        /*AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                        builder.setTitle("Date scanning failed. Please enter date manually.");
+
+                                        // Set up the input
+                                        final EditText input = new EditText(MainActivity.this);
+                                        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                                        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_);
+                                        builder.setView(input);
 
 
+
+                                        // Set up the buttons
+                                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                try {
+                                                    JSONArray messageDetails = getFoods();
+                                                    messageDetails.put((new Food(parsedDate, input.getText().toString())).toJSON());
+                                                    writeFoods(messageDetails);
+                                                } catch(Exception e) {
+                                                    Snackbar.make(binding.getRoot(), "_"+e.getMessage(), Snackbar.LENGTH_LONG)
+                                                            .setAction("Action", null).show();
+                                                }
+                                            }
+                                        });
+                                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.cancel();
+                                            }
+                                        });
+
+                                        builder.show();*/
+                                        return;
+                                    }
 
                                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                                     builder.setTitle("Enter Food Name");
@@ -321,14 +364,7 @@ public class MainActivity extends AppCompatActivity {
                                     input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL);
                                     builder.setView(input);
 
-                                    Date parsedDate;
-                                    try {
-                                        parsedDate = DateParser.parse(text.toString());
-                                    } catch(DateParser.ParseException e) {
-                                        Snackbar.make(binding.getRoot(), e.getMessage() + " " + text, Snackbar.LENGTH_LONG)
-                                                .setAction("Action", null).show();
-                                        return;
-                                    }
+
 
                                     // Set up the buttons
                                     builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
