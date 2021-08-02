@@ -125,8 +125,8 @@ public class MainActivity extends AppCompatActivity {
 
         foodFile = new File(this.getFilesDir(), FOOD_FILE);
 
-        Snackbar.make(binding.getRoot(), ""+foodFile.getAbsoluteFile().getPath(), Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+//        Snackbar.make(binding.getRoot(), ""+foodFile.getAbsoluteFile().getPath(), Snackbar.LENGTH_LONG)
+//                .setAction("Action", null).show();
 
         if (!foodFile.exists()) {
             try {
