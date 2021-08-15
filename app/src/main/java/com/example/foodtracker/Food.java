@@ -9,8 +9,13 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Food implements Comparable<Food> {
-    Date expDate;
-    String type;
+    public static final String NAME_TAG = "name";
+    public static final String EXP_DATE_TAG = "exp_date";
+
+    public static final String[] REQUIRED_ATTRS = new String[] {NAME_TAG, EXP_DATE_TAG};
+
+    private Date expDate;
+    private String type;
     public Food(Date expDate, String type){
         this.expDate = expDate;
         this.type = type;
@@ -28,17 +33,8 @@ public class Food implements Comparable<Food> {
         return expDate;
     }
 
-
     public String getFormattedDate() {
         return (new SimpleDateFormat("MM/dd/yyyy", Locale.US)).format(expDate);
-    }
-
-    public String getRecipe() {
-        return "https://www.google.com/search?q=" + this.getType() + "+recipes";
-    }
-
-    public String getOnlineShop() {
-        return "https://www.google.com/search?tbm=shop&q=" + this.getType();
     }
 
     @Override

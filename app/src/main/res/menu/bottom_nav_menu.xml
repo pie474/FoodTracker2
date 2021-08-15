@@ -8,12 +8,12 @@
 
     <item
         android:id="@+id/navigation_dashboard"
-        android:icon="@drawable/ic_add_black_24dp"
+        android:icon="@drawable/ic_plus_24dp"
         android:title="@string/title_addfood" />
 
-    <item
+    <!--<item
         android:id="@+id/navigation_notifications"
         android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="@string/title_notifications" />
+        android:title="@string/title_notifications" />-->
 
 </menu>

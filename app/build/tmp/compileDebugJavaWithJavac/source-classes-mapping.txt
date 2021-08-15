@@ -1,0 +1,63 @@
+com/example/foodtracker/databinding/ActivityCameraBinding.java
+ com.example.foodtracker.databinding.ActivityCameraBinding
+com/example/foodtracker/ui/camera/CameraActivity.java
+ com.example.foodtracker.ui.camera.CameraActivity
+ com.example.foodtracker.ui.camera.CameraActivity$1
+ com.example.foodtracker.ui.camera.CameraActivity$Analyzer
+ com.example.foodtracker.ui.camera.CameraActivity$Analyzer$1
+ com.example.foodtracker.ui.camera.CameraActivity$Analyzer$2
+ com.example.foodtracker.ui.camera.CameraActivity$Recognizable
+ com.example.foodtracker.ui.camera.CameraActivity$RecognizedObjectOverlay
+com/example/foodtracker/FoodAdapter.java
+ com.example.foodtracker.FoodAdapter
+ com.example.foodtracker.FoodAdapter$ViewHolder
+ com.example.foodtracker.FoodAdapter$ViewHolder$1
+com/example/foodtracker/barcode/BarcodeParser.java
+ com.example.foodtracker.barcode.BarcodeParser
+com/example/foodtracker/barcode/ItemNotFoundException.java
+ com.example.foodtracker.barcode.ItemNotFoundException
+com/example/foodtracker/ui/dashboard/DashboardViewModel.java
+ com.example.foodtracker.ui.dashboard.DashboardViewModel
+com/example/foodtracker/barcode/OnBarcodeParseFailedListener.java
+ com.example.foodtracker.barcode.OnBarcodeParseFailedListener
+com/example/foodtracker/DateParser.java
+ com.example.foodtracker.DateParser
+ com.example.foodtracker.DateParser$DateParseException
+com/example/foodtracker/ui/home/HomeViewModel.java
+ com.example.foodtracker.ui.home.HomeViewModel
+com/example/foodtracker/databinding/ActivityMainBinding.java
+ com.example.foodtracker.databinding.ActivityMainBinding
+com/example/foodtracker/barcode/OnBarcodeParsedListener.java
+ com.example.foodtracker.barcode.OnBarcodeParsedListener
+com/example/foodtracker/databinding/FragmentHomeBinding.java
+ com.example.foodtracker.databinding.FragmentHomeBinding
+com/example/foodtracker/Notif.java
+ com.example.foodtracker.Notif
+com/example/foodtracker/databinding/ActivityAddBinding.java
+ com.example.foodtracker.databinding.ActivityAddBinding
+com/example/foodtracker/databinding/ListItemBinding.java
+ com.example.foodtracker.databinding.ListItemBinding
+com/example/foodtracker/ui/home/HomeFragment.java
+ com.example.foodtracker.ui.home.HomeFragment
+com/example/foodtracker/Food.java
+ com.example.foodtracker.Food
+com/example/foodtracker/databinding/FragmentDashboardBinding.java
+ com.example.foodtracker.databinding.FragmentDashboardBinding
+com/example/foodtracker/ui/DetectFoodAttribute.java
+ com.example.foodtracker.ui.DetectFoodAttribute
+com/example/foodtracker/BuildConfig.java
+ com.example.foodtracker.BuildConfig
+com/example/foodtracker/ui/dashboard/DashboardFragment.java
+ com.example.foodtracker.ui.dashboard.DashboardFragment
+ com.example.foodtracker.ui.dashboard.DashboardFragment$1
+com/example/foodtracker/InputFood.java
+ com.example.foodtracker.InputFood
+com/example/foodtracker/ui/camera/GraphicOverlay.java
+ com.example.foodtracker.ui.camera.GraphicOverlay
+ com.example.foodtracker.ui.camera.GraphicOverlay$Graphic
+com/example/foodtracker/MainActivity.java
+ com.example.foodtracker.MainActivity
+ com.example.foodtracker.MainActivity$1
+com/example/foodtracker/AddActivity.java
+ com.example.foodtracker.AddActivity
+ com.example.foodtracker.AddActivity$1

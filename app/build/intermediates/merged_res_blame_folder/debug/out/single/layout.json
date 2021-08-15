@@ -1,0 +1,38 @@
+[
+    {
+        "merged": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/fragment_camera_preview.xml",
+        "source": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/src/main/res/layout/fragment_camera_preview.xml"
+    },
+    {
+        "merged": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/fragment_notifications.xml",
+        "source": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/src/main/res/layout/fragment_notifications.xml"
+    },
+    {
+        "merged": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/activity_main.xml",
+        "source": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/src/main/res/layout/activity_main.xml"
+    },
+    {
+        "merged": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/activity_camera.xml",
+        "source": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/src/main/res/layout/activity_camera.xml"
+    },
+    {
+        "merged": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/fragment_dashboard.xml",
+        "source": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/src/main/res/layout/fragment_dashboard.xml"
+    },
+    {
+        "merged": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/fragment_camera_confirm.xml",
+        "source": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/src/main/res/layout/fragment_camera_confirm.xml"
+    },
+    {
+        "merged": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/list_item.xml",
+        "source": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/src/main/res/layout/list_item.xml"
+    },
+    {
+        "merged": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/fragment_home.xml",
+        "source": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/src/main/res/layout/fragment_home.xml"
+    },
+    {
+        "merged": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/activity_add.xml",
+        "source": "/Users/chinmay/AndroidStudioProjects/FoodTrackerOld/FoodTracker2/app/src/main/res/layout/activity_add.xml"
+    }
+]

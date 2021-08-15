@@ -9,16 +9,16 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
-    private String[] localDataSet;
-    private Food[] dataSet2;
+    private ArrayList<Food> dataSet2;
+    private MainActivity mainActivity;
     Context context;
 
 
@@ -36,7 +36,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
             pos = p;
         }
 
-        public ViewHolder(View view) {
+        public ViewHolder(View view, MainActivity mainActivity) {
             super(view);
             // Define click listener for the ViewHolder's View
 
@@ -48,10 +48,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
                 @Override
                 public void onClick(View view) {
                     try {
-                        JSONArray arr = MainActivity.getFoods();
-                        arr.remove(pos);
-                        MainActivity.writeFoods(arr);
-                        //view.refreshDrawableState();
+                        mainActivity.removeFood(pos);
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();
                     }
@@ -76,14 +73,11 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
      * by RecyclerView.
      */
 
-    public FoodAdapter(String[] dataSet, Context context) {
-        localDataSet = dataSet;
-        this.context = context;
-    }
 
-    public FoodAdapter(Food[] dataSet, Context context) {
+    public FoodAdapter(ArrayList<Food> dataSet, Context context, MainActivity mainActivity) {
         dataSet2 = dataSet;
         this.context = context;
+        this.mainActivity = mainActivity;
     }
 
     // Create new views (invoked by the layout manager)
@@ -93,7 +87,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
         View view = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.list_item, viewGroup, false);
 
-        return new ViewHolder(view);
+        return new ViewHolder(view, mainActivity);
     }
 
 
@@ -115,15 +109,15 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.ViewHolder> {
 
         // viewHolder.getTextView().setText(localDataSet[position]);
         viewHolder.setPosition(position);
-        viewHolder.getTypeView().setText(dataSet2[position].getType());
-        viewHolder.getDateView().setText(dataSet2[position].getFormattedDate());
+        viewHolder.getTypeView().setText(dataSet2.get(position).getType());
+        viewHolder.getDateView().setText(dataSet2.get(position).getFormattedDate());
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         // return localDataSet.length
-        return dataSet2.length;
+        return dataSet2.size();
     }
 }
 
