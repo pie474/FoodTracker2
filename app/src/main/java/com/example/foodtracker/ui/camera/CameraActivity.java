@@ -12,17 +12,20 @@ import android.graphics.Point;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Toast;
 
-import com.example.foodtracker.DateParser;
 import com.example.foodtracker.Food;
-import com.example.foodtracker.MainActivity;
 import com.example.foodtracker.R;
-import com.example.foodtracker.barcode.BarcodeParser;
-import com.example.foodtracker.barcode.OnBarcodeParseFailedListener;
-import com.example.foodtracker.barcode.OnBarcodeParsedListener;
+import com.example.foodtracker.parsing.barcode.BarcodeParser;
+import com.example.foodtracker.parsing.barcode.OnBarcodeParseFailedListener;
+import com.example.foodtracker.parsing.barcode.OnBarcodeParsedListener;
+import com.example.foodtracker.parsing.date.DateParser;
+import com.example.foodtracker.ui.main.MainActivity;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
@@ -42,6 +45,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -69,6 +73,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class CameraActivity extends AppCompatActivity {
 
@@ -80,6 +86,15 @@ public class CameraActivity extends AppCompatActivity {
     private ExecutorService cameraExecutor;
     private PreviewView previewView;
     private GraphicOverlay graphicOverlay;
+
+    private FloatingActionButton doneButton;
+
+    ArrayList<VisionStatusItem> items = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private VisionStatusItemAdapter itemAdapter;
+
+    private VisionStatusItem nameItem = new VisionStatusItem("Name");
+    private VisionStatusItem expdateItem = new VisionStatusItem("Exp. Date");
 
     private final String TAG = "Camera";
     private final String FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS";
@@ -122,6 +137,28 @@ public class CameraActivity extends AppCompatActivity {
 //        if (savedInstanceState == null) {
 //            startCamera();
 //        }
+
+        doneButton = findViewById(R.id.finishCameraButton);
+        doneButton.setOnClickListener(view -> {
+            returnResult();
+        });
+        doneButton.setVisibility(View.GONE);
+
+
+        items.add(nameItem);
+        items.add(expdateItem);
+
+        recyclerView = findViewById(R.id.statusView);
+
+        itemAdapter = new VisionStatusItemAdapter(items, this, this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(itemAdapter);
     }
 
     @Override
@@ -201,7 +238,7 @@ public class CameraActivity extends AppCompatActivity {
             public void onImageSaved(@NotNull ImageCapture.OutputFileResults output) {
                 Uri savedUri = Uri.fromFile(photoFile);
                 String msg = "Photo capture succeeded: " + savedUri;
-                Toast.makeText(getBaseContext(), msg, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getBaseContext(), msg, Toast.LENGTH_SHORT).show();
                 Log.d(TAG, msg);
             }
         });
@@ -223,7 +260,6 @@ public class CameraActivity extends AppCompatActivity {
 
             Preview preview = new Preview.Builder().build();
             preview.setSurfaceProvider(previewView.getSurfaceProvider());
-
 
 
             imageCapture = new ImageCapture.Builder().build();
@@ -298,7 +334,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private boolean allAttrsDetected() {
-        for(String attr : Food.REQUIRED_ATTRS) {
+        for(String attr : Food.ALL_ATTRS) {
             if(detectedAttrs.getString(attr) == null) {
                 return false;
             }
@@ -306,9 +342,16 @@ public class CameraActivity extends AppCompatActivity {
         return true;
     }
 
+    private boolean oneAttrDetected() {
+        for(String attr : Food.ALL_ATTRS) {
+            if(detectedAttrs.getString(attr) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-
-
+ //a    2/2/21
     private class Analyzer implements ImageAnalysis.Analyzer {
         final Object lock = new Object();
 
@@ -332,6 +375,11 @@ public class CameraActivity extends AppCompatActivity {
         public void analyze(ImageProxy imageProxy) {
             if(allAttrsDetected()) {
                 returnResult();
+            }
+
+            if(oneAttrDetected()) {
+                Handler mainHandler = new Handler(getBaseContext().getMainLooper());
+                mainHandler.post(() -> doneButton.setVisibility(View.VISIBLE));
             }
 
             if (needUpdateGraphicOverlayImageSourceInfo) {
@@ -363,11 +411,15 @@ public class CameraActivity extends AppCompatActivity {
                                         if(upc==null) continue;
                                         if (BarcodeParser.validUPC(upc)) {
                                             detectedBlocks.add(new Recognizable(barcode.getCornerPoints(), Color.BLUE));
-                                            Log.d("debug", upc + "        " + (barcode.getDisplayValue()));
+                                            Log.d("debug", upc);
 
-                                            if (foodCache.containsKey(upc)) {
+                                            if (foodCache.containsKey(upc)) {//barcode has been seen before
                                                 detectedAttrs.putString(Food.NAME_TAG, foodCache.get(upc));
-                                            } else {
+                                                nameItem.setComplete(foodCache.get(upc));
+                                                itemAdapter.notifyItemChanged(items.indexOf(nameItem));
+                                            } else {//need to look it up
+                                                nameItem.setLoading();
+                                                itemAdapter.notifyItemChanged(items.indexOf(nameItem));
 
                                                 barcodeParser = new BarcodeParser(upc)
                                                         .addParsedListener(new OnBarcodeParsedListener() {
@@ -375,12 +427,16 @@ public class CameraActivity extends AppCompatActivity {
                                                             public void onParsed(String result) {
                                                                 detectedAttrs.putString(Food.NAME_TAG, result);
                                                                 foodCache.put(upc, result);
+                                                                nameItem.setComplete(result);
+                                                                itemAdapter.notifyItemChanged(items.indexOf(nameItem));
                                                             }
                                                         })
                                                         .addFailureListener(new OnBarcodeParseFailedListener() {
                                                             @Override
                                                             public void onFailure(Exception e) {
-                                                                Toast.makeText(CameraActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                                Log.d("debug", ""+e.getMessage());
+                                                                nameItem.reset();
+                                                                itemAdapter.notifyItemChanged(items.indexOf(nameItem));
                                                             }
                                                         });
                                                 barcodeParser.start();
@@ -397,18 +453,25 @@ public class CameraActivity extends AppCompatActivity {
                     runningTasks++;
                     textRecognizer.process(image)
                             .addOnSuccessListener(visionText -> {
+                                List<DateParser.FoundDate> dates = new ArrayList<>();
                                 for (Text.TextBlock block : visionText.getTextBlocks()) {
                                     for (Text.Line line : block.getLines()) {
-                                        detectedBlocks.add(new Recognizable(line.getCornerPoints(), Color.YELLOW));
+                                        List<DateParser.FoundDate> foundDates = DateParser.parse(line);
+                                        for(DateParser.FoundDate d : foundDates) {
+                                            if(d.getCornerPoints() != null) detectedBlocks.add(new Recognizable(d.getCornerPoints(), Color.YELLOW));
+                                        }
+                                        dates.addAll(foundDates);
                                     }
                                 }
-                                try {
-                                    String date = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(DateParser.parse(visionText.getText()));
-                                    detectedAttrs.putString(Food.EXP_DATE_TAG, date);
-                                } catch (Exception e) {
-                                    Log.d("debug", e.getMessage());
-                                }
 
+                                if(dates.size() > 0) {
+                                    LocalDate date = dates.get(0).getDate();
+                                    detectedAttrs.putInt(Food.EXP_DAY_TAG, date.getDayOfMonth());
+                                    detectedAttrs.putInt(Food.EXP_MONTH_TAG, date.getMonthValue());
+                                    detectedAttrs.putInt(Food.EXP_YEAR_TAG, date.getYear());
+                                    expdateItem.setComplete(date.toString());
+                                    itemAdapter.notifyItemChanged(items.indexOf(expdateItem));
+                                }
                             })
                             .addOnCompleteListener(task -> closeIfLast(imageProxy));
                 }

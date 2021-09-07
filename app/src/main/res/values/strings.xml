@@ -15,5 +15,12 @@
     <string name="title_activity_fullscreen">FullscreenActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="expiration_date_text">expiration date</string>
+    <string name="item_name_text">item name</string>
+    <string name="monthHint">month</string>
+    <string name="dayHint">day</string>
+    <string name="yearHint">year</string>
+    <string name="slash">/</string>
+    <string name="addLayout">addLayout</string>
 
 </resources>

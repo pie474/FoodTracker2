@@ -1,10 +1,12 @@
-package com.example.foodtracker.barcode;
+package com.example.foodtracker.parsing.barcode;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BarcodeParser extends Thread {
     private static final String BASE_URL = "https://www.amazon.com/";
@@ -12,8 +14,8 @@ public class BarcodeParser extends Thread {
     private static final String PRODUCT_EXTENSION = "dp/";
     private static final String USER_AGENT = "Safari/537.36";
 
-    private OnBarcodeParsedListener parsedListener = null;
-    private OnBarcodeParseFailedListener failureListener = null;
+    private List<OnBarcodeParsedListener> parsedListeners = new ArrayList<>();
+    private List<OnBarcodeParseFailedListener> failureListeners = new ArrayList<>();
     private final String upc;
 
     public BarcodeParser(String upc) {
@@ -22,28 +24,23 @@ public class BarcodeParser extends Thread {
 
 
     public BarcodeParser addParsedListener(OnBarcodeParsedListener listener) {
-        parsedListener = listener;
+        parsedListeners.add(listener);
         return this;
     }
 
     public BarcodeParser addFailureListener(OnBarcodeParseFailedListener listener) {
-        failureListener = listener;
+        failureListeners.add(listener);
         return this;
     }
-
-    /*public void parse(String upc) {
-        this.upc = upc;
-        start();
-    }*/
-
 
     @Override
     public void run() {
         try {
             if(!validUPC(upc)) throw new IllegalArgumentException(String.format("\"%s\" is not a valid UPC code", upc));
-            if(parsedListener != null) parsedListener.onParsed(getProductTitle(getASIN(upc)));
+            String title = getProductTitle(getASIN(upc));
+            for(OnBarcodeParsedListener pl : parsedListeners) pl.onParsed(title);
         } catch(Exception e) {
-            if(failureListener != null) failureListener.onFailure(e);
+            for(OnBarcodeParseFailedListener fl : failureListeners) fl.onFailure(e);
         }
     }
 

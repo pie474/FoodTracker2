@@ -1,11 +1,10 @@
-package com.example.foodtracker;
+package com.example.foodtracker.ui.main;
 
-import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 
-public class Notif extends android.app.Application{
+public class Notif extends android.app.Application {
     public static final String NOTIFICATION_ID = "notif";
 
     @Override

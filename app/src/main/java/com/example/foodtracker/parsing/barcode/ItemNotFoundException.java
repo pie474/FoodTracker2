@@ -1,4 +1,4 @@
-package com.example.foodtracker.barcode;
+package com.example.foodtracker.parsing.barcode;
 
 public class ItemNotFoundException extends Exception {
     public ItemNotFoundException() {

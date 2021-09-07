@@ -1,4 +1,4 @@
-package com.example.foodtracker.ui;
+package com.example.foodtracker.ui.camera;
 
 import android.app.Activity;
 import android.content.Context;

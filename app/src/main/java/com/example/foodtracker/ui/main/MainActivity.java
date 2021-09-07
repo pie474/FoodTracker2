@@ -1,15 +1,18 @@
-package com.example.foodtracker;
+package com.example.foodtracker.ui.main;
 
 import android.app.Activity;
-import android.app.Notification;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.example.foodtracker.Food;
+import com.example.foodtracker.R;
 import com.example.foodtracker.databinding.ActivityMainBinding;
+import com.example.foodtracker.ui.addFood.InputFood;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
@@ -24,19 +27,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import static com.example.foodtracker.Notif.NOTIFICATION_ID;
 
 public class MainActivity extends AppCompatActivity {
     public static final String CURRENT_FOODS_FILE = "food.json";
@@ -45,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     private NotificationManagerCompat notificationManager;
-    ArrayList<Food> almostExpired;
 
     public static final int EXPIRED_DAYS_THRESHOLD = 4;
 
@@ -64,14 +60,11 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("debug", "null");
                         return;
                     }
-                    try {
-                        addFood(result);
-                    } catch (Exception e) {
-                        Log.d("debug", e.getMessage());
-                    }
-                    //Log.d("debug", "date: "+result);
+                    addFood(result);
                 }
             });
+
+    BroadcastReceiver notificationBroadcastReceiver = new NotificationBroadcastReceiver();
 
 
     @Override
@@ -106,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        //Log.d("debug", this.getFilesDir());
+
         cachedFoodFile = new File(this.getFilesDir(), CACHED_FOOD_FILE);
         if (!cachedFoodFile.exists()) {
             try {
@@ -120,24 +115,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        try {
+            items.addAll(readFoodsArray());
+        } catch (Exception e) {
+            Log.d("debug", e.getMessage());
+        }
+
         notificationManager = NotificationManagerCompat.from(this);
 
-
-        Calendar c = Calendar.getInstance();
-        c.setTime(new Date());
-        c.add(Calendar.DAY_OF_MONTH, EXPIRED_DAYS_THRESHOLD);
-
-        almostExpired = new ArrayList<>();
-        try {
-            for(Food a:getFoodsArray()){
-                if(c.after(a.getExpDate())) {
-                    almostExpired.add(a);
-                    sendNotification(a);
-                }
-            }
-        } catch (IOException | JSONException | ParseException e) {
-            e.printStackTrace();
-        }
 
         recyclerView = findViewById(R.id.recycler_view);
 
@@ -147,26 +132,28 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
         foodAdapter = new FoodAdapter(items, this, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(foodAdapter);
 
-        refresh();
-    }
+        //registerReceiver(notificationBroadcastReceiver, new IntentFilter(AlarmReceiver.ACTION));
 
+        /*SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+        boolean firstStart = prefs.getBoolean("firstStart", true);
 
-    public void sendNotification(Food f){
-        String title = "Food Expiring Soon";
-        String message = "Hey! Your Item \"" + f.getType() + "\" is about to expire in "+EXPIRED_DAYS_THRESHOLD+" days!";
-
-        Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_ID)
-                .setSmallIcon(R.drawable.ic_foodicon)
-                .setContentTitle(title)
-                .setContentText(message)
-                .build();
-        notificationManager.notify(1, notification );
+        if (firstStart) { //CODE TO RUN ON FIRST STARTUP (atm setting up notifs)
+            Intent intent = new Intent(this, AlarmReceiver.class);
+            intent.putExtra("NotificationText", "some text");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);//PendingIntent.FLAG_UPDATE_CURRENT
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            if (alarmManager != null) {
+                Log.d("debug", "SET");
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(), 60000, pendingIntent);
+                //alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
+            }
+            //prefs.edit().putBoolean("firstStart", false).apply();
+        }*/
     }
 
 
@@ -197,18 +184,29 @@ public class MainActivity extends AppCompatActivity {
         bw.close();
     }
 
-    private void writeFoods(JSONArray json) throws IOException{
-        writeJSON(currentFoodsFile, json);
-        refresh();
-    }
-
     private void writeFoods() {
+        JSONArray arr = new JSONArray();
+        for(Food f : items) {
+            try {
+                arr.put(f.toJSON());
+            } catch (JSONException e) {
+                Log.d("debug", e.getMessage());
+            }
+        }
 
+        try {
+            writeJSON(currentFoodsFile, arr);
+        } catch(IOException e) {
+            Log.d("debug", e.getMessage());
+        }
     }
 
-    private ArrayList<Food> getFoodsArray() throws IOException, JSONException, ParseException {
+    public ArrayList<Food> getActiveFoodArray() {
+        return items;
+    }
+
+    ArrayList<Food> readFoodsArray() throws IOException, JSONException, ParseException {
         JSONArray arr = readJSON(currentFoodsFile);
-        Log.d("debug", arr.toString());
         ArrayList<Food> newFoods = new ArrayList<>();
 
         for(int i = 0; i<arr.length(); i++) {
@@ -217,33 +215,33 @@ public class MainActivity extends AppCompatActivity {
         return newFoods;
     }
 
-    private void addFood(Food f) throws IOException, JSONException {
-        JSONArray messageDetails = readJSON(currentFoodsFile);
-        messageDetails.put(f.toJSON());
-        writeFoods(messageDetails);
-    }
+    private void addFood(Food f) {
+        for(int i = 0; i<items.size()+1; i++) {
+            if(i==items.size()) {
+                items.add(f);
+                foodAdapter.notifyItemInserted(i);
+                break;
+            }
+            if(items.get(i).compareTo(f) > 0) {
+                items.add(i, f);
+                foodAdapter.notifyItemInserted(i);
+                break;
+            }
 
-    public void removeFood(int index) throws IOException, JSONException {
-        JSONArray messageDetails = readJSON(currentFoodsFile);
-        messageDetails.remove(index);
-        writeFoods(messageDetails);
-    }
-
-    public void refresh() {
-        try {
-            ArrayList<Food> newList = getFoodsArray();
-            items.clear();
-            items.addAll(newList);
-            Collections.sort(items);
-            foodAdapter.notifyDataSetChanged();
-        } catch (Exception e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
+
+        writeFoods();
+    }
+
+    public void removeFood(int index) {
+        items.remove(index);
+        foodAdapter.notifyItemRemoved(index);
+        writeFoods();
     }
 
     @Override
     protected void onResume() {
-        refresh();
+        //refresh();
         super.onResume();
     }
 
@@ -262,5 +260,54 @@ public class MainActivity extends AppCompatActivity {
         context.startActivity(i);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //unregisterReceiver(notificationBroadcastReceiver);
+    }
 
+    public static class NotificationBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try {
+//                ArrayList<Food> arr = readFoodsArray();
+                ArrayList<Food> arr = new ArrayList<>();
+                ArrayList<Food> aboutToExpire = new ArrayList<>();
+                ArrayList<Food> expired = new ArrayList<>();
+                for(Food f : arr) {
+                    @Food.ExpState int state = f.getExpirationState();
+                    if(state == Food.EXP_STATE_EXPIRED) {
+                        expired.add(f);
+                    } else if(state == Food.EXP_STATE_ALMOST) {
+                        aboutToExpire.add(f);
+                    } else if(state == Food.EXP_STATE_OK){
+                        break;
+                    }
+                }
+
+                NotificationHelper notificationHelper = new NotificationHelper(context);
+
+                if(aboutToExpire.size() > 0){
+                    StringBuilder message = new StringBuilder();
+                    for(Food f : aboutToExpire) {
+                        message.append(f.getType());
+                        message.append(", ");
+                    }
+                    message.setLength(message.length()-2);
+                    notificationHelper.createNotification("These foods are about to expire!", message.toString());
+                }
+                if(expired.size() > 0){
+                    StringBuilder message = new StringBuilder();
+                    for(Food f : expired) {
+                        message.append(f.getType());
+                        message.append(", ");
+                    }
+                    message.setLength(message.length()-2);
+                    notificationHelper.createNotification("These foods have expired!", message.toString());
+                }
+            } catch (Exception e) {
+                Log.d("debug", "alarm recieved with exception: " + e.getMessage());
+            }
+        }
+    }
 }

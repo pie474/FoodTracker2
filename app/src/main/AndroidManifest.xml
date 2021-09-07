@@ -3,14 +3,14 @@
     package="com.example.foodtracker">
 
     <application
-        android:name=".Notif"
+        android:name=".ui.main.Notif"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FoodTracker">
-        <activity android:name=".AddActivity">
+        <activity android:name=".ui.addFood.AddActivity">
             <intent-filter>
                 <action android:name="com.example.foodtracker.INPUT_FOOD" />
 
@@ -25,12 +25,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.main.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.example.foodtracker.SEND_NOTIFICATION" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
@@ -47,7 +52,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+        <receiver android:name=".ui.main.AlarmReceiver" />
+        <receiver android:name=".ui.main.MainActivity$NotificationBroadcastReceiver" />
     </application>
+
+
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-permission android:name="android.permission.INTERNET" />

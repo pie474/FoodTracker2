@@ -1,13 +1,13 @@
-package com.example.foodtracker;
+package com.example.foodtracker.ui.addFood;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+import com.example.foodtracker.Food;
+
+import java.time.LocalDate;
 
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
@@ -29,13 +29,8 @@ public class InputFood extends ActivityResultContract<Integer, Food> {
             Log.d("debug", "error: " + resultCode + (result==null?" null":""));
             return null;
         }
-        try {
-            return new Food(
-                    new SimpleDateFormat("MM/dd/yyyy", Locale.US).parse(result.getExtras().getString(Food.EXP_DATE_TAG)),
-                    result.getExtras().getString(Food.NAME_TAG));
-        } catch (ParseException e) {
-            Log.d("debug", e.getMessage());
-            return null;
-        }
+        return new Food(
+                LocalDate.parse(result.getExtras().getString(Food.EXP_DATE_TAG)),
+                result.getExtras().getString(Food.NAME_TAG));
     }
 }

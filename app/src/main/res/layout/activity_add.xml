@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AddActivity">
+    android:id="@+id/addLayout"
+    tools:context=".ui.addFood.AddActivity">
 
     <EditText
         android:id="@+id/editTextFoodName"
@@ -13,21 +14,62 @@
         android:layout_marginTop="64dp"
         android:ems="10"
         android:inputType="text"
-        android:text=""
+        android:hint="@string/item_name_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/editTextExpDate"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/dateInput"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="64dp"
-        android:ems="10"
-        android:inputType="date"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/buttonSubmit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextFoodName" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextFoodName">
+
+        <com.example.foodtracker.ui.addFood.NoCursorEditText
+            android:id="@+id/editTextExpMonth"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/monthHint"
+            android:inputType="number" />
+
+        <TextView
+            android:id="@+id/dayYearDelimiter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/slash" />
+
+        <com.example.foodtracker.ui.addFood.NoCursorEditText
+            android:id="@+id/editTextExpDay"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/dayHint"
+            android:inputType="number" />
+
+        <TextView
+            android:id="@+id/monthDayDelimiter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/slash" />
+
+        <com.example.foodtracker.ui.addFood.NoCursorEditText
+            android:id="@+id/editTextExpYear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/yearHint"
+            android:inputType="number" />
+
+    </LinearLayout>
 
     <ImageButton
         android:id="@+id/buttonLaunchCamera"
@@ -37,7 +79,8 @@
         android:src="@drawable/ic_camera_black_24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextExpDate" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonSubmit"
+        android:contentDescription="TODO" />
 
     <Button
         android:id="@+id/buttonSubmit"
@@ -47,6 +90,6 @@
         android:text="@string/title_addfood"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonLaunchCamera" />
+        app:layout_constraintTop_toBottomOf="@+id/dateInput" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
